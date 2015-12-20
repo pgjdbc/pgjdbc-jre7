@@ -1,0 +1,60 @@
+sudo: false
+language: java
+
+before_script:
+  - psql -U postgres -c "create user test with password 'test';"
+  - psql -c 'create database test owner test;' -U postgres
+  - echo "MAVEN_OPTS='-Xmx1g -Dgpg.skip=true'" > ~/.mavenrc
+
+env:
+  global:
+    - secure: "xNtQ4Fh4v3RH6uLqs7oSKI26xvZjFaB3LK/gyo/IUA7vLbCPa6ZECD5ExuIMjRtBqxLv/q5rnuW3xrBnI5ISc4Qw9cXoP9/DcwSYty9j17QQ9WlnhVjOcQo4U5xxSdRESIiauoCwT+BnUDgQ8EGU5y7FfQtfLnEvUrsT63aARfnUH4O5xqGwqv/Cc81GE6uxlnIYpet8VfJbD+6CM5MUZVnpxxF1TwNBhDZjf9lDxNJqHOAfXZ5iDpU8z5QgtXEpUyqEDRz5xvs7UAQhJluqXpnOmcC9L4HcmegtnMQ5oJnsJnjQ3YUDpxpvx0NUVV8A0Q59gYyvuxtHOJo0T83b8QyITV2wQgmihFBAaEKBQM7e9/PHkDkkyWh1Q+fW9SzjvJ8WIR5jwYCZ8vtupPMWEgT+GV/r0lp05qvbPNVeGDJL+nMq9OvfqTJ6HRiNL7eYlhnIYJfQfsrjEJlm1d69IVQHnS/zgVMmDQVXx9GNzbFpgtGZYCOjlxj264Yi4bSTe3812BX3O9QBXnf2LnldNkzmEMDaMgZ37SFvSLHJP43V2cd3hs30HrmWzqj2LUqFOewSYv9l0oCUGS6jgis5KlTKaPHxRg6HRdSUxcFYesYgGUcurklDgm6K2umJc463PmPjSIJjfwNj0Y0tMyVwtLRBuobbthtJUftYOijTqis="
+    - secure: "os4noXn466nw+E0In4ehVYpOobgIIcXm1aGXJV9KiTFQxCNgUZ+tuSnGdfZapP7ayNh07S7e/uOtwBHzSwQJ71CfFxMGRsw78JA9Aa6ly85ytqpVqEBJZ8jdDksH7gVQCOvWpkheRKBVkChKamHDnYucsNeyZ1Q9RkVnUmuHrdpO7w4d3VoEKe5tffVJfE/L6RyntQfslUm0bF0HRQ7X3O77iwqXn77VFpadbkdU0z2Td8s47EWcSzG0LyeHdC8qtVJP1J387BZ9yKbnsXWUvw3z3bYHu/uGEgbV3PRaAX2l3QRYwq/2rHa8mG6cCzfNTQ1ShaIWlVKRSZy8+mmsK69ymZauy50lrjay6RBvS9gVOhLrlYIdjYdue3RPT0lsaLPc4nh57/rNDJNXvuxXMLufGIMqjFLwbXrhtY8HBOoRCWeCP7mqQbQ6sPn16gpzlcBTj6Fig5w6VkweqqFfUnKXRGmDUSCqHk1HVT/DnOEf3uOON0y1x6Ju1dTv37kfUX9IpEBqtP+I87iXC3aV4+T5Q3K8MUKNo8HlLLaImlkZ9oWMlDhpoOx3sthm/EzPmsQCuPN4+s2HZpjH0kb5odipumBfpnb7K/z2hIjNeQ8FnLrGLLZ0ZLX/BK0SZ1xUacseojdbTvwXYNSemQDjJwFd1yeWjKnUrrPEDcx8uQk="
+
+script:
+  # make sure previous build artifacts are not used for subsequent builds
+  - rm -rf $HOME/.m2/repository/org/postgresql || true
+  - export JDK6_HOME=$(jdk_switcher home openjdk6)
+  - export JDK7_HOME=$(jdk_switcher home openjdk7)
+  - export JDK8_HOME=$(jdk_switcher home oraclejdk8)
+  - envsubst < toolchains.xml > ~/.m2/toolchains.xml
+  - ./travis_build.sh
+  # To avoid useless S3 cache updates (https://github.com/travis-ci/travis-ci/issues/1441#issuecomment-67607074)
+  #- mkdir /tmp/cache-trick
+  #- mv $HOME/.m2/repository/org/postgresql /tmp/cache-trick/
+
+before_cache:
+  # No sense in caching current build artifacts
+  rm -rf $HOME/.m2/repository/org/postgresql
+
+# Skip default "mvn install" issued by Travis
+# Root project cannot be compiled with older JDKs, so it makes sense to just skip the step
+install: true
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+
+matrix:
+  fast_finish: true
+  include:
+    - jdk: openjdk7
+      addons:
+        postgresql: "9.4"
+      env: PG_VERSION=9.4
+    - jdk: openjdk7
+      addons:
+        postgresql: "9.3"
+      env: PG_VERSION=9.3
+    - jdk: openjdk7
+      addons:
+        postgresql: "9.2"
+      env: PG_VERSION=9.2
+    - jdk: openjdk7
+      addons:
+        postgresql: "9.1"
+      env: PG_VERSION=9.1
+
+# Deploy snapshots to Maven Central
+after_success:
+  - "test $TRAVIS_PULL_REQUEST == 'false' && test $TRAVIS_BRANCH == 'master' && test $PG_VERSION == '9.4' && ./travis_deploy.sh"
