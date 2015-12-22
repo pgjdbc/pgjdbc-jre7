@@ -10,7 +10,7 @@
     <artifactId>postgresql</artifactId>
     <packaging>bundle</packaging>
     <name>PostgreSQL JDBC Driver - JDBC 4.1</name>
-    <version>9.4.1207.jre7-SNAPSHOT</version>
+    <version>9.4.1207.jre7</version>
     <description>Java JDBC 4.1 (JRE 7+) driver for PostgreSQL database</description>
 
     <properties>
@@ -41,7 +41,8 @@
         <url>https://github.com/pgjdbc/pgjdbc-jre7</url>
         <connection>scm:git:https://github.com/pgjdbc/pgjdbc-jre7.git</connection>
         <developerConnection>scm:git:git@github.com:pgjdbc/pgjdbc-jre7.git</developerConnection>
-    </scm>
+      <tag>REL9.4.1207.jre7</tag>
+  </scm>
 
     <profiles>
         <profile>
@@ -60,30 +61,29 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <target>
-                                        <echo message="Generating ${unzip.jdk.ant.build.xml}"/>
+                                        <echo message="Generating ${unzip.jdk.ant.build.xml}" />
                                         <!-- No one knows how to generate file with literal "${java.home}" content, so
                                              we generate @{java.home}, and replace @ -> $ later.
                                              ${java.home} should be resolved by Ant, not Maven -->
                                         <echoxml file="${unzip.jdk.ant.build.xml}">
                                             <project>
-                                                <unzip src="@{java.home}/../src.zip"
-                                                       dest="@{project.build.directory}/jdk-src">
+                                                <unzip src="@{java.home}/../src.zip" dest="@{project.build.directory}/jdk-src">
                                                     <patternset>
                                                         <!-- Only specific classes are extracted as there are lots of
                                                              "package sun.reflect does not exist" errors when compiling via
                                                              JDK7's javadoc -->
-                                                        <include name="java/sql/**/*.java"/>
-                                                        <include name="javax/sql/**/*.java"/>
-                                                        <include name="javax/naming/**/*.java"/>
-                                                        <include name="java/io/InputStream.java"/>
-                                                        <include name="java/io/OutputStream.java"/>
-                                                        <include name="java/io/FilterInputStream.java"/>
-                                                        <include name="java/io/FilterOutputStream.java"/>
+                                                        <include name="java/sql/**/*.java" />
+                                                        <include name="javax/sql/**/*.java" />
+                                                        <include name="javax/naming/**/*.java" />
+                                                        <include name="java/io/InputStream.java" />
+                                                        <include name="java/io/OutputStream.java" />
+                                                        <include name="java/io/FilterInputStream.java" />
+                                                        <include name="java/io/FilterOutputStream.java" />
                                                     </patternset>
                                                 </unzip>
                                             </project>
                                         </echoxml>
-                                        <replace file="${unzip.jdk.ant.build.xml}" token="@" value="$"/>
+                                        <replace file="${unzip.jdk.ant.build.xml}" token="@" value="$" />
                                     </target>
                                 </configuration>
                             </execution>
