@@ -43,6 +43,10 @@ matrix:
     - jdk: openjdk7
       addons:
         postgresql: "10"
+        apt:
+          packages:
+            - postgresql-10
+            - postgresql-client-10
       env: PG_VERSION=10
     - jdk: openjdk7
       addons:
