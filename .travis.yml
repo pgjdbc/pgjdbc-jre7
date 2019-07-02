@@ -42,6 +42,10 @@ matrix:
   include:
     - jdk: openjdk7
       addons:
+        postgresql: "10.2"
+      env: PG_VERSION=10.2
+    - jdk: openjdk7
+      addons:
         postgresql: "9.4"
       env: PG_VERSION=9.4
     - jdk: openjdk7
@@ -52,10 +56,6 @@ matrix:
       addons:
         postgresql: "9.2"
       env: PG_VERSION=9.2
-    - jdk: openjdk7
-      addons:
-        postgresql: "9.1"
-      env: PG_VERSION=9.1
 
 # Deploy snapshots to Maven Central
 after_success:
