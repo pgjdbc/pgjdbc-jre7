@@ -42,8 +42,8 @@ matrix:
   include:
     - jdk: openjdk7
       addons:
-        postgresql: "10.2"
-      env: PG_VERSION=10.2
+        postgresql: "10"
+      env: PG_VERSION=10
     - jdk: openjdk7
       addons:
         postgresql: "9.4"
