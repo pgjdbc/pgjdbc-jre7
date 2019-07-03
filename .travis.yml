@@ -1,5 +1,6 @@
 sudo: false
 language: java
+dist: trusty
 
 before_script:
   - psql -U postgres -c "create user test with password 'test';"
@@ -51,10 +52,6 @@ matrix:
       addons:
         postgresql: "9.2"
       env: PG_VERSION=9.2
-    - jdk: openjdk7
-      addons:
-        postgresql: "9.1"
-      env: PG_VERSION=9.1
 
 # Deploy snapshots to Maven Central
 after_success:
